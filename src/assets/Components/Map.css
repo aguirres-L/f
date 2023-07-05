@@ -1,0 +1,15 @@
+.container-map{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: solid 2px red;
+}
+
+.map1{
+    margin-top: 50px;
+    border: solid 2px red;
+}
+@media screen and (max-width: 800px){
+  
+}

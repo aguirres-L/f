@@ -1,155 +1,183 @@
+import React, { useState, useRef } from 'react';
+import { GoogleMap, LoadScript, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
 
-
-import React, { useState } from 'react';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
-
-const containerStyle = {
-  width: '400px',
-  height: '400px'
-};
 
 const center = {
-  lat: -31.4315,
-  lng: -64.2303
+  lat: -31.431468,
+  lng: -64.229144,
+};
+
+const restrictionBounds = {
+  north: -31.416925,
+  south: -31.446925,
+  west: -64.252429,
+  east: -64.222429
 };
 
 const Map = () => {
-  const [markerPosition, setMarkerPosition] = useState(null);
-  const [address, setAddress] = useState('');
+  const [originPosition, setOriginPosition] = useState(null);
+  const [destinationPosition, setDestinationPosition] = useState(null);
+  const originAddressRef = useRef(null);
+  const destinationAddressRef = useRef(null);
 
-  const handleAddressSubmit = (e) => {
+  const [km, setKm] = useState(null);
+
+  const [directions, setDirections] = useState(null);
+  const [showDirections, setShowDirections] = useState(false);
+
+
+
+
+  const containerStyle = {
+    width: "850px",
+    height: '600px'
+  };
+  
+  const stylseMobile={
+    with:"390px",
+    height:"700px",
+  }
+
+  
+
+
+
+  const handleOriginSubmit = (e) => {
     e.preventDefault();
+    const address = originAddressRef.current.value;
+    geocodeAddress(address, setOriginPosition);
+  };
 
+
+
+  const handleDestinationSubmit = (e) => {
+    e.preventDefault();
+    const address = destinationAddressRef.current.value;
+    geocodeAddress(address, setDestinationPosition);
+  };
+
+  const geocodeAddress = (address, setPosition) => {
     const geocoder = new window.google.maps.Geocoder();
     geocoder.geocode({ address }, (results, status) => {
-    /*   if (status === 'OK' && results.length > 0) {
-        const location = results[0].geometry.location;
-        setMarkerPosition({
-          lat: location.lat(),
-          lng: location.lng()
-        });
-
-        // Aquí puedes utilizar el valor de 'location' para realizar la lógica que necesites
-
-      } else {
-        console.error('Geocode was not successful for the following reason: ' + status);
-      } */
-      
-      console.log(status);
-    });
-  };
-
-  const handleAddressChange = (e) => {
-    setAddress(e.target.value);
-  };
-
-  return (
-    <LoadScript googleMapsApiKey="AIzaSyA4tI6GkKv6UL1JEDoJmsN8tzMWnETppKo">
-      <GoogleMap
-        mapContainerStyle={containerStyle}
-        center={center}
-        zoom={13}
-      >
-        {markerPosition && <Marker position={markerPosition} />}
-      </GoogleMap>
-      <form onSubmit={handleAddressSubmit}>
-        <input
-          type="text"
-          id="res"
-          placeholder="Enter address"
-          value={address}
-          onChange={handleAddressChange}
-        />
-        <button type="submit">Add Marker</button>
-      </form>
-    </LoadScript>
-  );
-};
-
-export default Map;
-
-
-
-
-/*  import React, { useState, useRef } from 'react';
-
-
-
-import { GoogleMap, LoadScript, Marker, DirectionsService, DirectionsRenderer, } from '@react-google-maps/api';
-
-const containerStyle = {
-  width: '400px',
-  height: '400px'
-};
-
-const center = {
-  lat: -31.4315,
-  lng: -64.2303
-};
-
-const Map = () => {
-  const [markerPosition, setMarkerPosition] = useState(null);
-  const addressRef = useRef(null);
-  const [directionsResponse, setDirectionsResponse] = useState(null);
-
-  const [ubi, setUbi] = useState("");
-
-  const handleAddressSubmit = (e) => {
-    e.preventDefault();
-    const geocoder = new window.google.maps.Geocoder();
-    const address = addressRef.current.value;
-   geocoder.geocode({ address }, (results, status) => {
       if (status === window.google.maps.GeocoderStatus.OK) {
         const location = results[0].geometry.location;
-        setMarkerPosition({
+        setPosition({
           lat: location.lat(),
           lng: location.lng()
         });
-
-        const origin = new window.google.maps.LatLng(location.lat(), location.lng());
-        const destination = new window.google.maps.LatLng(center.lat, center.lng);
-        const directionsService = new window.google.maps.DirectionsService();
-
-        directionsService.route(
-          {
-            origin: origin,
-            destination: destination,
-            travelMode: window.google.maps.TravelMode.DRIVING
-          },
-          (response, status) => {
-            if (status === window.google.maps.DirectionsStatus.OK) {
-              setDirectionsResponse(response);
-            } else {
-              console.error('Error calculating directions:', status);
-            }
-          }
-        );
       } else {
         console.error('Geocode was not successful for the following reason: ' + status);
       }
     });
-  
-    console.log(address);
   };
 
- return (
-    <LoadScript googleMapsApiKey="AIzaSyDluxQk6wpbI55mP9vhmsTzxf2WwpmDJlI">
+  const calculateDistance = () => {
+    if (originPosition && destinationPosition) {
+      const origin = new window.google.maps.LatLng(originPosition.lat, originPosition.lng);
+      const destination = new window.google.maps.LatLng(destinationPosition.lat, destinationPosition.lng);
+      const service = new window.google.maps.DistanceMatrixService();
+
+      service.getDistanceMatrix(
+        {
+          origins: [origin],
+          destinations: [destination],
+          travelMode: 'DRIVING'
+        },
+        (response, status) => {
+          if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
+            const distance = response.rows[0].elements[0].distance.text;
+            console.log('Distancia:', distance);
+            setKm(distance)
+            getDirections();
+          } else {
+            console.error('Error al calcular la distancia:', status);
+          }
+        }
+      );
+    }
+  };
+
+  const getDirections = () => {
+    const directionsService = new window.google.maps.DirectionsService();
+    const origin = new window.google.maps.LatLng(originPosition.lat, originPosition.lng);
+    const destination = new window.google.maps.LatLng(destinationPosition.lat, destinationPosition.lng);
+
+    directionsService.route(
+      {
+        origin: origin,
+        destination: destination,
+        travelMode: 'DRIVING'
+      },
+      (result, status) => {
+        if (status === 'OK') {
+          setDirections(result);
+          setShowDirections(true);
+        } else {
+          console.error('Error al obtener las direcciones:', status);
+        }
+      }
+    );
+  };
+
+  const renderDirections = () => {
+    return (
+      directions && (
+        <DirectionsRenderer
+          directions={directions}
+          options={{
+            suppressMarkers: true,
+            preserveViewport: true
+          }}
+        />
+      )
+    );
+  };
+
+  return (
+
+    <div className='container-map'>
+        <LoadScript googleMapsApiKey="AIzaSyA4tI6GkKv6UL1JEDoJmsN8tzMWnETppKo">
       <GoogleMap
-        mapContainerStyle={containerStyle}
+        mapContainerStyle={ window.innerWidth <800 ? stylseMobile : containerStyle}
         center={center}
         zoom={13}
+        options={{
+          restriction: {
+            latLngBounds: restrictionBounds,
+            strictBounds: false
+          }
+        }}
       >
-        <Marker position={center}  />
-         <DirectionsRenderer directions={directionsResponse} />
+        {originPosition && <Marker position={originPosition} />}
+        {destinationPosition && <Marker position={destinationPosition} />}
+        {showDirections && renderDirections()}
       </GoogleMap>
-      <form onSubmit={handleAddressSubmit}>
-        <input type="text" placeholder="Enter address"/>
-        <button type="submit">Add Marker</button>
+      
+      <div className="map1">
+        
+        <form onSubmit={handleOriginSubmit}>
+        <input type="text" placeholder="Ingrese la dirección de partida" ref={originAddressRef} />
+        <button type="submit">Mostrar en el mapa</button>
       </form>
+      <form onSubmit={handleDestinationSubmit}>
+        <input type="text" placeholder="Ingrese la dirección de destino" ref={destinationAddressRef} />
+        <button type="submit">Mostrar dirección</button>
+      </form>
+      <button onClick={calculateDistance} disabled={!originPosition || !destinationPosition}>
+        Calcular distancia 
+      </button>
+      <p>{km}</p>
+        
+        </div>
+    
     </LoadScript>
+  
+    </div>
+
   );
 };
 
 export default Map;
-*/
+
+
