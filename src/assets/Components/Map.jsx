@@ -1,60 +1,74 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect ,useContext} from 'react';
 import { GoogleMap, LoadScript, Marker, DirectionsService, DirectionsRenderer } from '@react-google-maps/api';
 
+import card from "../img/card.png"
+import bike from "../img/bike.png"
+import "./Map.css"
 
+import icono from "../img/2.png"
+import icono1 from "../img/3.png"
+
+import DistanciaContext from './Context/Distancia/Distancias';
+import InfoPedido from './InfoPedido/InfoPedido';
 
 const center = {
   lat: -31.431468,
   lng: -64.229144,
 };
 
-const restrictionBounds = {
-  north: -31.416925,
-  south: -31.446925,
-  west: -64.252429,
-  east: -64.222429
-};
+
 
 const Map = () => {
   const [originPosition, setOriginPosition] = useState(null);
-  const [destinationPosition, setDestinationPosition] = useState(null);
+  
   const originAddressRef = useRef(null);
   const destinationAddressRef = useRef(null);
+  
+ // console.log(originAddressRef);
+  
+  const remitenteRef = useRef(null);
+  const destinatarioRef = useRef(null);
+  
+  
 
-  const [km, setKm] = useState(null);
-
+    const {kilometros,setKilometros,setPartida,setDestino, setRemitente, setDestinatario,socket,latitude,
+      longitude,destinationPosition, setDestinationPosition} = useContext(DistanciaContext)
+  
   const [directions, setDirections] = useState(null);
   const [showDirections, setShowDirections] = useState(false);
-
-
-
+  const [repMarkers, setRepMarkers] = useState([]);
 
   const containerStyle = {
     width: "850px",
-    height: '600px'
+    height: '500px',
   };
   
-  const stylseMobile={
-    with:"390px",
-    height:"700px",
-  }
-
+  const stylseMobile = {
+    width: "100%",
+    height: "400px",
+  };
   
-
+  //console.log(latitude,longitude,"ver");
+  
+ // console.log(socket);
 
 
   const handleOriginSubmit = (e) => {
     e.preventDefault();
-    const address = originAddressRef.current.value;
+    const address = `${originAddressRef.current.value},Cordoba`;
     geocodeAddress(address, setOriginPosition);
+    setPartida(address)
+    const remitente = remitenteRef.current.value;
+    setRemitente(remitente)
   };
-
-
 
   const handleDestinationSubmit = (e) => {
     e.preventDefault();
-    const address = destinationAddressRef.current.value;
-    geocodeAddress(address, setDestinationPosition);
+    const address = `${destinationAddressRef.current.value},Cordoba`;
+    geocodeAddress(address, setDestinationPosition); /// talvez su hago una x puedo cerrar el contenido del mensaje 
+    setDestino(address)
+    const destinatario = destinatarioRef.current.value;
+    setDestinatario(destinatario)
   };
 
   const geocodeAddress = (address, setPosition) => {
@@ -87,8 +101,9 @@ const Map = () => {
         (response, status) => {
           if (status === 'OK' && response.rows[0].elements[0].status === 'OK') {
             const distance = response.rows[0].elements[0].distance.text;
-            console.log('Distancia:', distance);
-            setKm(distance)
+        //    console.log('Distancia:', distance);
+    //        setKm(distance)
+            setKilometros(distance)
             getDirections();
           } else {
             console.error('Error al calcular la distancia:', status);
@@ -120,6 +135,48 @@ const Map = () => {
     );
   };
 
+  useEffect(() => {
+    // Simulación de cambio en la disponibilidad de los repartidores
+    const interval = setInterval(() => {
+      // Aquí debes obtener la información actualizada de la disponibilidad de los repartidores
+      const repartidoresDisponibles = obtenerRepartidoresDisponibles();
+
+      // Generar los marcadores de los repartidores disponibles
+      const markers = repartidoresDisponibles.map(repartidor => ({
+        position: { lat: repartidor.latitud, lng: repartidor.longitud },
+        icon: repartidor.tipo === 'auto' ? card : bike
+      }));
+
+      setRepMarkers(markers);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const obtenerRepartidoresDisponibles = () => {
+    // Aquí debes obtener la información actualizada de los repartidores disponibles desde tu backend o alguna fuente de datos
+    // Retorna una lista de objetos con la latitud, longitud y tipo de los repartidores disponibles
+    // Por ejemplo:
+    return [
+      { latitud: -31.431468, longitud: -64.229144, tipo: 'auto' },
+      { latitud: -31.416925, longitud: -64.222429, tipo: 'moto' },
+    ];
+  };
+
+  const renderMarkers = () => {
+    return repMarkers.map((marker, index) => (
+      <Marker
+        key={index} 
+        position={marker.position} 
+        icon={{
+        url: marker.icon,
+        scaledSize: new window.google.maps.Size(22, 22), // Tamaño personalizado del ícono (32x32 píxeles)
+        origin: new window.google.maps.Point(0, 0),
+        anchor: new window.google.maps.Point(16, 16), // Punto de anclaje del ícono (centro del ícono)
+      }} />
+    ));
+  };
+
   const renderDirections = () => {
     return (
       directions && (
@@ -134,50 +191,74 @@ const Map = () => {
     );
   };
 
+
+
+
   return (
-
-    <div className='container-map'>
-        <LoadScript googleMapsApiKey="AIzaSyA4tI6GkKv6UL1JEDoJmsN8tzMWnETppKo">
-      <GoogleMap
-        mapContainerStyle={ window.innerWidth <800 ? stylseMobile : containerStyle}
-        center={center}
-        zoom={13}
-        options={{
-          restriction: {
-            latLngBounds: restrictionBounds,
-            strictBounds: false
-          }
-        }}
-      >
-        {originPosition && <Marker position={originPosition} />}
-        {destinationPosition && <Marker position={destinationPosition} />}
-        {showDirections && renderDirections()}
-      </GoogleMap>
-      
-      <div className="map1">
-        
-        <form onSubmit={handleOriginSubmit}>
-        <input type="text" placeholder="Ingrese la dirección de partida" ref={originAddressRef} />
-        <button type="submit">Mostrar en el mapa</button>
-      </form>
-      <form onSubmit={handleDestinationSubmit}>
-        <input type="text" placeholder="Ingrese la dirección de destino" ref={destinationAddressRef} />
-        <button type="submit">Mostrar dirección</button>
-      </form>
-      <button onClick={calculateDistance} disabled={!originPosition || !destinationPosition}>
-        Calcular distancia 
-      </button>
-      <p>{km}</p>
-        
-        </div>
+    <div className="container-superior">
+    <a href="https://api.whatsapp.com/send?phone=3516463416&text=Hola.. Me podrian dar mas informacion?"><img className='logo' src={icono} alt="" /></a>
     
-    </LoadScript>
-  
+    <div className='container-map'>
+      <LoadScript googleMapsApiKey="AIzaSyA4tI6GkKv6UL1JEDoJmsN8tzMWnETppKo">
+        <GoogleMap
+          mapContainerStyle={window.innerWidth < 800 ? stylseMobile : containerStyle}
+          center={center}
+          zoom={13}
+          /* options={{
+            restriction: {
+              latLngBounds: restrictionBounds,
+              strictBounds: false
+            }
+          }} */
+        >
+          {originPosition && <Marker position={originPosition} />}
+          {destinationPosition && <Marker position={destinationPosition} />}
+          {renderMarkers()}
+          {showDirections && renderDirections()}
+        </GoogleMap>
+        <div className="map1">
+          
+          <form   className={!destinationPosition ?'my-form':"btn-null"} onSubmit={handleOriginSubmit}>
+        
+          <input type="text" placeholder="Nombre del local o remitente" ref={remitenteRef} /> {/* Nuevo input */}
+            <br/>
+            <br/>
+            <input type="text" placeholder="Dirección " ref={originAddressRef} />
+            <button className='btn-Submit' type="submit">Mostrar punto de partida</button>
+          </form>
+          
+          <form  className={!destinationPosition ?'my-form':"btn-null"} onSubmit={handleDestinationSubmit}>
+          <input type="text" placeholder="Nombre del destinatario" ref={destinatarioRef} /> {/* Nuevo input */}
+          <br/>
+            <br/>
+            <input type="text" placeholder="Dirección" ref={destinationAddressRef} />
+            <button className='btn-Submit' type="submit">Mostrar punto de destino</button>
+          </form>
+          <button className={destinationPosition ?'btn-calculo':"btn-null"}  onClick={calculateDistance} disabled={!originPosition || !destinationPosition}>
+        <span>C</span>
+        <span>A</span>
+        <span>L</span>
+        <span>C</span>
+        <span>U</span>
+        <span>L</span>
+        <span>A</span>
+        <span>R</span>
+          </button>
+        </div>
+        </LoadScript>
+        
     </div>
-
+    {kilometros
+    &&<InfoPedido remitenteRef={remitenteRef} />
+    }
+    
+    </div>
   );
 };
 
 export default Map;
 
 
+
+
+      //  <LoadScript googleMapsApiKey="AIzaSyA4tI6GkKv6UL1JEDoJmsN8tzMWnETppKo">

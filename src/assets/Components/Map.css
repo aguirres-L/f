@@ -1,15 +1,184 @@
-.container-map{
-    width: 100%;
+
+.container-superior{
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: solid 2px red;
+    flex-direction: row;
+    margin-top: 2%;
+}
+.container-superior a img{
+    width:  50px;
+    height:     50px;
+}
+.logo{
+    transition: all 2s ease;
+}
+.container-map{
 }
 
 .map1{
-    margin-top: 50px;
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    width: 900px;
+    margin-left: 2%;
+}
+.map1 form{
+    margin-bottom: 2%;
+}
+
+
+
+.btn-calculo{
+    background-color: rgb(8, 8, 8);
+    width: 100px;
+    color: black;
+    margin-right: 10.5%;
     border: solid 2px red;
 }
+
+
+
+.btn-calculo span {
+    color: rgba(12, 0, 0, 0.022);
+    transition: all .3s ease;
+    
+}
+
+.btn-calculo>span {
+    animation: glow 2s ease-in-out infinite;
+    transition: all .3s ease;
+}
+
+
+
+@keyframes glow {
+    0%,to {
+        color: #ee0505;
+        text-shadow: 0 0 12px rgb(249, 21, 0),0 0 50px rgb(255, 9, 1),0 0 100px rgb(255, 5, 5)
+    }
+
+    10%,90% {
+        color: #9b0a0aac;
+        text-shadow: none
+    }
+}
+
+
+
+
+.btn-calculo>span:nth-child(2) {
+    animation-delay: .25s
+}
+
+.btn-calculo>span:nth-child(3) {
+    animation-delay: .5s
+}
+
+.btn-calculo>span:nth-child(4) {
+    animation-delay: .75s
+}
+
+.btn-calculo>span:nth-child(5) {
+    animation-delay: 1s
+}
+
+.btn-calculo>span:nth-child(6) {
+    animation-delay: 1.25s
+}
+
+.btn-calculo>span:nth-child(7) {
+    animation-delay: 1.5s
+}
+
+.btn-calculo>span:nth-child(8) {
+    animation-delay: 1.75s
+}
+
+.btn-calculo>span:nth-child(9) {
+    animation-delay: 2s
+}
+
+.btn-calculo>span:nth-child(10) {
+    animation-delay: 2.25s
+}
+.btn-calculo>span:nth-child(11) {
+    animation-delay: 2.5s
+}
+
+
+
+
+
+
+
+
+
+
+
+input{
+    width: 80%;
+    border: 1px solid rgba(246, 3, 3, 0.558);
+    background-color: rgba(52, 52, 52, 0.735);
+    color: white;
+    text-align: center;
+    }
+input::placeholder{
+    color: rgba(255, 255, 255, 0.429);
+    text-align: center;
+}
+
+.btn-Submit{
+    margin-left: 15%;
+}
+
+button{
+    background-color: rgba(0, 0, 0, 0.807);
+    color: rgb(223, 16, 16);
+    border: solid 0px ;
+    padding: 2px;
+    border-radius: 4%;
+    margin-top: 3%;
+    border-radius: 4%;
+    font-size: medium;
+    box-shadow: 0px 0px 8px black;
+}
+
+.btn-null{
+    display: none;
+}
+
+
+
 @media screen and (max-width: 800px){
-  
+    .map1{
+        width: 100%;
+        flex-direction: column;
+    }  
+    
+    .my-form {
+    margin-left: 15%;
+    }
+    .container-superior a img{
+        width:  35px;
+        height: 35px;
+    }
+    .btn-Submit{
+        margin-left: 0;
+        width: 80%;
+        margin-top: 5%;
+        margin-bottom: 5%;
+    }
+    
+.btn-calculo{
+    margin-top: 5%;
+}
+
+.container-superior{
+    flex-direction: column;
+    
+}
+
+.container-map{
+    width: 300px;
+}
 }

@@ -1,0 +1,49 @@
+.container-Info-Pedido{
+    background-color: rgb(57, 57, 57);
+    padding: 35px;
+    box-shadow: 0px 0px 20px black;
+    font-family: sans-serif;
+    color: white;
+    border-radius: 2%;
+    height: 100%;
+}
+
+.container-Info-Pedido hr{
+    border: .1rem solid rgba(191, 9, 9, 0.534);
+    box-shadow: 0px 0px 5px rgb(5, 5, 5);
+}
+.container-Info-Pedido span{
+    font-weight: 100;
+    margin-left: 2%;
+}
+.container-Info-Pedido button{
+    margin-left: 40%;
+    cursor: pointer;
+    color: rgb(128, 5, 5);
+    transition: all .2s ease;
+}
+.container-Info-Pedido button:hover{
+    color: red;
+    transition: all .2s ease;
+    
+}
+
+
+.btn-X{
+    position: absolute;
+    margin: 0;
+    left: 55%;
+    
+}
+
+
+@media screen and (max-width: 800px){
+
+.container-Info-Pedido{
+margin-top: 5%;
+}
+
+.btn-X{
+    left: 45%;
+}
+}

@@ -1,0 +1,14 @@
+html{background-color: rgba(22, 22, 22, 0.891);}
+
+.container-aap{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    flex-direction: row;
+}
+
+@media screen and (max-width: 800px){
+    .container-aap{
+        margin-top: -5%;    
+    }
+}
